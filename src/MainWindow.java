@@ -29,10 +29,13 @@ public class MainWindow extends Application {
 	Scene mainScene;
 	Stage primaryStage;
 	
+	public static final boolean DEBUG_MODE = true;
+	public static final boolean SHOW_GRIDS = false;
+	
 	@Override
 	public void start(Stage primaryStage){
 		this.primaryStage = primaryStage;
-		primaryStage.setTitle("Form");
+		primaryStage.setTitle("GESS - Gmail E-mail Scrape Service");
 		
 		
 		mainScene = SetMainScene();
@@ -64,6 +67,7 @@ public class MainWindow extends Application {
 		grid.add(emailLabel, 0, 1);
 		TextField emailTextField = new TextField();
 		emailTextField.setTooltip(new Tooltip("Enter your Gmail e-mail e.g \"bob@gmail.com\""));
+		
 		grid.add(emailTextField, 1, 1);
 		
 		Label passwordLabel = new Label("Senha:");
@@ -92,7 +96,11 @@ public class MainWindow extends Application {
 				email = emailTextField.getText();
 				password = passwordTextField.getText();
 				emailService = new EmailConnectionService(email, password);
-				boolean result = emailService.Login();
+				boolean result;
+				
+				if (DEBUG_MODE) result = true;
+				else result = emailService.Login();
+				
 				if (result){
 					actionTarget.setFill(Color.DARKSEAGREEN);
 					actionTarget.setText("Login was successful.");	
@@ -109,13 +117,16 @@ public class MainWindow extends Application {
 			}
 		});
 		
+		grid.setGridLinesVisible(SHOW_GRIDS);
 		Scene scene = new Scene(grid, 450, 275);
 		return scene;
 		
 	}
 	
 	private Scene SetMainScene(){
-		return new Scene(new GridPane(), 415, 300);
+		
+		
+		return new Scene(new GridPane(), 650, 400);
 	}
 
 	
