@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -45,9 +46,11 @@ public class EmailConnectionService {
 		return true;
 	}
 
-	public void ReadEmails() {
+	public void ReadEmails() throws MessagingException {
 		MainWindow.setHeaderInfo("Downloading...", GESSColor.DOWNLOADING_ORANGE);
 		MainWindow.addToLog("Starting to read e-mails...");
+		
+		int numberOfEmailsFromLast = 30;
 		try {
 						
 			Session session = Session.getInstance(props);
@@ -59,15 +62,21 @@ public class EmailConnectionService {
 			Folder inbox = store.getFolder("INBOX");
 			inbox.open(Folder.READ_ONLY);					
 			MainWindow.addToLog("Reading last 30 e-mails...");
-			for (int i = inbox.getMessageCount() ; i >= inbox.getMessageCount()-30 ; i--){
+			
+			emailList = new ArrayList<Message>();
+			for (int i = inbox.getMessageCount() ; i >= inbox.getMessageCount()-numberOfEmailsFromLast ; i--){
 				Message message = inbox.getMessage(i);
-				MainWindow.addToLog(message.getSubject());
+				MainWindow.addToLog(message.getSubject());				
+				emailList.add(message);
+				MainWindow.setHeaderInfo("Downloading... [" + emailList.size() + "/" + numberOfEmailsFromLast +"]", GESSColor.DOWNLOADING_ORANGE);
 			}
-			MainWindow.addToLog("Finished reading e-mails.");
+			MainWindow.addToLog("Finished downloading e-mails.");
 			MainWindow.addToLog("Ready to apply rules.");
 		} catch (MessagingException e) {
 			MainWindow.addToLog("ERROR reading questions. Exception: " + e.getClass().getSimpleName());
 			e.printStackTrace();
+			
+			throw new MessagingException();
 		}
 
 	}

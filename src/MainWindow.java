@@ -47,9 +47,11 @@ public class MainWindow extends Application {
 
 	private Button loginButton;
 
+	private Button downloadEmailsButton;
+
 	private static TextArea logArea;
 
-	public static final boolean DEBUG_MODE = false;
+	public static final boolean DEBUG_MODE = true;
 	public static final boolean SHOW_GRIDS = false;
 
 	private static Label headerInfoLabel;
@@ -148,6 +150,7 @@ public class MainWindow extends Application {
 							@Override
 							public void run() {
 								primaryStage.setScene(mainScene);
+								primaryStage.centerOnScreen();
 								addToLog("Application started.");
 							}
 						});
@@ -192,7 +195,7 @@ public class MainWindow extends Application {
 		leftPane.setPadding(new Insets(15, 15, 15, 15));
 		leftPane.setVgap(15);
 
-		Button downloadEmailsButton = new Button("Download all E-mails");
+		downloadEmailsButton = new Button("Download all E-mails");
 		downloadEmailsButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
@@ -203,11 +206,12 @@ public class MainWindow extends Application {
 
 		applyRules = new Button("Apply Rules");
 		applyRules.setDisable(true);
+		leftPane.add(applyRules, 0, 1);
 
 		exportCSVButton = new Button("Export to CSV");
 		exportCSVButton.setDisable(true);
-
-		leftPane.add(exportCSVButton, 0, 1);
+		leftPane.add(exportCSVButton, 0, 2);
+		
 		leftPane.setStyle("-fx-background-color: #d7e4e5");
 
 		logArea = new TextArea();
@@ -216,7 +220,7 @@ public class MainWindow extends Application {
 		logArea.setText("---LOG---");
 		logArea.setWrapText(true);
 
-		leftPane.add(logArea, 0, 2);
+		leftPane.add(logArea, 0, 3);
 
 		// Center
 		ScrollPane scrollPane = new ScrollPane();
@@ -279,13 +283,18 @@ public class MainWindow extends Application {
 
 			@Override
 			protected Void call() throws Exception {
+				downloadEmailsButton.setDisable(true);
 				try {
 					newRuleButton.setDisable(true);
 					emailService.ReadEmails();
-				} catch (IllegalStateException e) {
+					MainWindow.setHeaderInfo("Ready to apply rules.", GESSColor.SUCCESS_GREEN);
+					applyRules.setDisable(false);
+				} catch (Exception e) {
+					MainWindow.setHeaderInfo("Failed to download e-mails. Try again.", GESSColor.ERROR_RED);
 					// e.printStackTrace();
 				}
 				newRuleButton.setDisable(false);
+				downloadEmailsButton.setDisable(false);
 				return null;
 			}
 
