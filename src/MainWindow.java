@@ -27,11 +27,28 @@ public class MainWindow extends Application {
 	EmailConnectionService emailService;	
 	Scene loginScene;
 	Scene mainScene;
+	Stage primaryStage;
 	
 	@Override
 	public void start(Stage primaryStage){
+		this.primaryStage = primaryStage;
 		primaryStage.setTitle("Form");
 		
+		
+		mainScene = SetMainScene();
+		loginScene = SetLoginScene();
+		
+		primaryStage.setScene(loginScene);
+		primaryStage.show();
+	}
+	
+	
+	public static void main(String[] args) {
+		launch(args);
+	}
+	
+	private Scene SetLoginScene(){
+
 		GridPane grid = new GridPane();
 		grid.setAlignment(Pos.CENTER);
 		grid.setHgap(10);
@@ -66,7 +83,6 @@ public class MainWindow extends Application {
 		final Text actionTarget = new Text();
 		grid.add(actionTarget, 1, 6);
 		
-		mainScene = new Scene(new GridPane(), 415, 300);
 		button.setOnAction(new EventHandler<ActionEvent>() {
 			//FIXME
 			
@@ -93,14 +109,14 @@ public class MainWindow extends Application {
 			}
 		});
 		
-		loginScene = new Scene(grid, 450, 275);
+		Scene scene = new Scene(grid, 450, 275);
+		return scene;
 		
-		primaryStage.setScene(loginScene);
-		primaryStage.show();
 	}
 	
-
-	public static void main(String[] args) {
-		launch(args);
+	private Scene SetMainScene(){
+		return new Scene(new GridPane(), 415, 300);
 	}
+
+	
 }
