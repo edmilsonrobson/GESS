@@ -32,7 +32,6 @@ public class EmailConnectionService {
 	}
 
 	public boolean Login() {
-				
 		session = Session.getInstance(props);
 		try {
 			Store store = session.getStore("pop3s");
@@ -58,14 +57,16 @@ public class EmailConnectionService {
 			store.connect(host, email, password);
 			MainWindow.addToLog("Connected!");
 			Folder inbox = store.getFolder("INBOX");
-			inbox.open(Folder.READ_ONLY);
-			MainWindow.addToLog("Found " + inbox.getMessageCount() + " e-mails.");
+			inbox.open(Folder.READ_ONLY);					
 			MainWindow.addToLog("Reading last 30 e-mails...");
 			for (int i = inbox.getMessageCount() ; i >= inbox.getMessageCount()-30 ; i--){
 				Message message = inbox.getMessage(i);
 				MainWindow.addToLog(message.getSubject());
 			}
+			MainWindow.addToLog("Finished reading e-mails.");
+			MainWindow.addToLog("Ready to apply rules.");
 		} catch (MessagingException e) {
+			MainWindow.addToLog("ERROR reading questions. Exception: " + e.getClass().getSimpleName());
 			e.printStackTrace();
 		}
 
