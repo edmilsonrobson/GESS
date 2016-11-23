@@ -2,6 +2,8 @@
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import com.sun.glass.ui.TouchInputSupport;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -11,8 +13,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -24,10 +28,13 @@ import javafx.stage.Stage;
 
 public class MainWindow extends Application {
 
-	EmailConnectionService emailService;	
+	EmailConnectionService emailService = new EmailConnectionService("none", "none");
+	
 	Scene loginScene;
 	Scene mainScene;
 	Stage primaryStage;
+	
+	private static TextArea logArea;
 	
 	public static final boolean DEBUG_MODE = true;
 	public static final boolean SHOW_GRIDS = false;
@@ -125,9 +132,38 @@ public class MainWindow extends Application {
 	
 	private Scene SetMainScene(){
 		
+		BorderPane pane = new BorderPane();
 		
-		return new Scene(new GridPane(), 650, 400);
+		//Header
+		HBox header = new HBox();
+		header.setPadding(new Insets(5, 10, 5, 10));
+		header.setSpacing(10);
+		Label connectedEmail = new Label("Connected");		
+		header.getChildren().add(connectedEmail);
+		header.setStyle("-fx-background-color: #88BBFF");
+		
+		//Left
+		GridPane leftPane = new GridPane();
+		leftPane.setAlignment(Pos.BOTTOM_CENTER);
+		leftPane.setPadding(new Insets(15,15,15,15));
+		
+		
+		logArea = new TextArea();
+		logArea.setPrefSize(250, 160);
+		logArea.setEditable(false);
+		logArea.setText("---LOG---");
+		logArea.setWrapText(true);
+		leftPane.add(logArea, 0, 0);
+		
+		pane.setTop(header);
+		pane.setLeft(leftPane);
+		
+		return new Scene(pane, 800, 400);
+		
 	}
 
+	public static void AddToLog(String message){
+		logArea.setText(logArea.getText() + "\n" + message);
+	}
 	
 }
