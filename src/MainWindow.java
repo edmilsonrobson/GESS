@@ -18,7 +18,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -38,10 +37,11 @@ public class MainWindow extends Application {
 
 	private static TextArea logArea;
 
-	public static final boolean DEBUG_MODE = true;
+	public static final boolean DEBUG_MODE = false;
 	public static final boolean SHOW_GRIDS = false;
 	
-	private int ruleOffset = 2;
+	private static Label headerInfoLabel;
+	private static HBox header;
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -137,11 +137,11 @@ public class MainWindow extends Application {
 		BorderPane pane = new BorderPane();
 
 		// Header
-		HBox header = new HBox();
+		header = new HBox();
 		header.setPadding(new Insets(5, 10, 5, 10));
 		header.setSpacing(10);
 		header.setAlignment(Pos.CENTER);
-		Label headerInfoLabel = new Label("Connected.");
+		headerInfoLabel = new Label("Connected.");
 		headerInfoLabel.setStyle("-fx-font: 15px Tahoma");
 		header.getChildren().add(headerInfoLabel);
 		header.setStyle("-fx-background-color: " + GESSColor.NEUTRAL_BLUE);
@@ -153,6 +153,12 @@ public class MainWindow extends Application {
 		leftPane.setVgap(15);
 
 		Button downloadEmailsButton = new Button("Download all E-mails");
+		downloadEmailsButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				emailService.ReadEmails();
+			}
+		});
 		leftPane.add(downloadEmailsButton, 0, 0);
 		Button exportCSVButton = new Button("Export to CSV");
 		exportCSVButton.setDisable(true);
@@ -201,11 +207,21 @@ public class MainWindow extends Application {
 	}
 
 	public static void addToLog(String message) {
+		Calendar calendar = Calendar.getInstance();
+		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+		String currentTime = sdf.format(calendar.getTime());
+		
+		message = "[" + currentTime + "] " + message;
 		logArea.setText(logArea.getText() + "\n" + message);
 	}
 	
-	public static void setheaderInfo(String message, String hexColor){
-		
+	public static void setHeaderInfo(String message, String hexColor){
+		header.setStyle("-fx-background-color: " + hexColor);
+		MainWindow.setHeaderInfo(message);
+	}
+	
+	public static void setHeaderInfo(String message){
+		headerInfoLabel.setText(message);
 	}
 	
 	private void onDeleteRuleButtonClick(HBox ruleBox){
@@ -237,7 +253,8 @@ public class MainWindow extends Application {
 				onDeleteRuleButtonClick(ruleBox);
 			}
 		});
-		ruleOffset++;
 	}
+	
+	
 
 }

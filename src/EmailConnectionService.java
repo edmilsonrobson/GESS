@@ -63,7 +63,7 @@ public class EmailConnectionService {
 			message.setRecipients(RecipientType.TO, toUser);
 
 			Transport.send(message);
-			System.out.println("GGWP");
+			MainWindow.addToLog("GGWP");
 
 		} catch (AddressException e) {
 			// TODO Auto-generated catch block
@@ -76,20 +76,21 @@ public class EmailConnectionService {
 	}
 
 	public void ReadEmails() {
-		System.out.println("Starting to read e-mails...");
+		MainWindow.setHeaderInfo("Downloading...", GESSColor.DOWNLOADING_ORANGE);
+		MainWindow.addToLog("Starting to read e-mails...");
 		try {
 						
 			Session session = Session.getInstance(props);
-			System.out.println("Getting Store...");
+			MainWindow.addToLog("Getting Store...");
 			Store store = session.getStore("imap");
-			System.out.println("Connecting...");
+			MainWindow.addToLog("Connecting...");
 			store.connect(host, email, password);
-			System.out.println("Connected!");
+			MainWindow.addToLog("Connected!");
 			Folder inbox = store.getFolder("INBOX");
 			inbox.open(Folder.READ_ONLY);
-			System.out.println("Searching for messages...");
-			Message msg = inbox.getMessage(inbox.getMessageCount());
-			System.out.println(msg.getSubject().toString());
+			MainWindow.addToLog("Found " + inbox.getMessageCount() + " e-mails.");
+			MainWindow.addToLog("Searching for messages...");
+			Message msg = inbox.getMessage(inbox.getMessageCount());			
 		} catch (MessagingException e) {
 			e.printStackTrace();
 		}
