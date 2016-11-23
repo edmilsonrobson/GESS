@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -47,8 +48,8 @@ public class MainWindow extends Application {
 		this.primaryStage = primaryStage;
 		primaryStage.setTitle("GESS - Gmail E-mail Scrape Service");
 
-		mainScene = SetMainScene();
-		loginScene = SetLoginScene();
+		mainScene = setMainScene();
+		loginScene = setLoginScene();
 
 		primaryStage.setScene(loginScene);
 		primaryStage.show();
@@ -58,7 +59,7 @@ public class MainWindow extends Application {
 		launch(args);
 	}
 
-	private Scene SetLoginScene() {
+	private Scene setLoginScene() {
 
 		GridPane grid = new GridPane();
 		grid.setAlignment(Pos.CENTER);
@@ -131,7 +132,7 @@ public class MainWindow extends Application {
 
 	}
 
-	private Scene SetMainScene() {
+	private Scene setMainScene() {
 
 		BorderPane pane = new BorderPane();
 
@@ -166,9 +167,11 @@ public class MainWindow extends Application {
 		leftPane.add(logArea, 0, 2);
 
 		// Center
+		ScrollPane scrollPane = new ScrollPane();
+		
 		centerPane = new GridPane();
 		centerPane.setAlignment(Pos.TOP_LEFT);
-		centerPane.setPadding(new Insets(15, 15, 15, 15));
+		centerPane.setPadding(new Insets(10, 15, 10, 15));
 		centerPane.setVgap(15);		
 		
 		Label rulesHeader = new Label("Rules");
@@ -179,15 +182,17 @@ public class MainWindow extends Application {
 		newRuleButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				AddRule();
+				onAddRuleButtonClick();
 			}
 		});
+		
 		centerPane.add(newRuleButton, 0, 1);
 		
 		
+		scrollPane.setContent(centerPane);
 		pane.setTop(header);
 		pane.setLeft(leftPane);
-		pane.setCenter(centerPane);
+		pane.setCenter(scrollPane);
 		
 		//leftPane.setGridLinesVisible(true);
 		//centerPane.setGridLinesVisible(true);
@@ -195,15 +200,43 @@ public class MainWindow extends Application {
 
 	}
 
-	public static void AddToLog(String message) {
+	public static void addToLog(String message) {
 		logArea.setText(logArea.getText() + "\n" + message);
 	}
 	
-	private void AddRule(){
-		VBox ruleBox = new VBox(10);
-		ruleBox.setPadding(new Insets(5, 10, 5, 10));
+	public static void setheaderInfo(String message, String hexColor){
 		
-		centerPane.add(ruleBox, 0, ruleOffset);
+	}
+	
+	private void onDeleteRuleButtonClick(HBox ruleBox){
+		centerPane.getChildren().remove(ruleBox);		
+	}
+	
+	private void onAddRuleButtonClick(){
+		HBox ruleBox = new HBox(10);
+		ruleBox.setPadding(new Insets(0, 10, 0, 10));
+		ruleBox.setAlignment(Pos.CENTER);
+		
+		Label ruleName = new Label("Rule");
+		ruleBox.getChildren().add(ruleName);
+		
+		TextField regexField = new TextField();
+		regexField.setTooltip(new Tooltip("The desired Regex for this rule."));
+		regexField.setPromptText("Regex (example: \"Name: (.*)$\"");
+		regexField.setPrefSize(250, 30);
+		regexField.setFocusTraversable(false);
+		ruleBox.getChildren().add(regexField);
+		
+		Button deleteButton = new Button("Delete");
+		ruleBox.getChildren().add(deleteButton);
+		centerPane.addColumn(0, ruleBox);
+		
+		deleteButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				onDeleteRuleButtonClick(ruleBox);
+			}
+		});
 		ruleOffset++;
 	}
 
