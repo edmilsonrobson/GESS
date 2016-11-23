@@ -1,20 +1,12 @@
-import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 
-import javax.mail.Address;
-import javax.mail.Authenticator;
 import javax.mail.Folder;
 import javax.mail.Message;
-import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
-import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 
 public class EmailConnectionService {
 
@@ -24,6 +16,8 @@ public class EmailConnectionService {
 	private Properties props;
 	private String host;
 	private Session session;
+	
+	private List<Message> emailList;
 
 	public EmailConnectionService(String email, String password) {
 		this.email = email;
@@ -52,29 +46,6 @@ public class EmailConnectionService {
 		return true;
 	}
 
-	public void SendEmail() {
-		/*
-		try {
-			Message message = new MimeMessage(session);
-			message.setFrom(new InternetAddress(email));
-			Address[] toUser = InternetAddress.parse(email);
-			message.setSubject("Test Subject");
-			message.setText("Email enviado!");
-			message.setRecipients(RecipientType.TO, toUser);
-
-			Transport.send(message);
-			MainWindow.addToLog("GGWP");
-
-		} catch (AddressException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		*/
-	}
-
 	public void ReadEmails() {
 		MainWindow.setHeaderInfo("Downloading...", GESSColor.DOWNLOADING_ORANGE);
 		MainWindow.addToLog("Starting to read e-mails...");
@@ -89,8 +60,11 @@ public class EmailConnectionService {
 			Folder inbox = store.getFolder("INBOX");
 			inbox.open(Folder.READ_ONLY);
 			MainWindow.addToLog("Found " + inbox.getMessageCount() + " e-mails.");
-			MainWindow.addToLog("Searching for messages...");
-			Message msg = inbox.getMessage(inbox.getMessageCount());			
+			MainWindow.addToLog("Reading last 30 e-mails...");
+			for (int i = inbox.getMessageCount() ; i >= inbox.getMessageCount()-30 ; i--){
+				Message message = inbox.getMessage(i);
+				MainWindow.addToLog(message.getSubject());
+			}
 		} catch (MessagingException e) {
 			e.printStackTrace();
 		}

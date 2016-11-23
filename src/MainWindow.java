@@ -3,6 +3,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -35,6 +36,8 @@ public class MainWindow extends Application {
 	
 	GridPane centerPane;
 
+	private Button newRuleButton;
+
 	private static TextArea logArea;
 
 	public static final boolean DEBUG_MODE = false;
@@ -53,6 +56,7 @@ public class MainWindow extends Application {
 
 		primaryStage.setScene(loginScene);
 		primaryStage.show();
+		
 	}
 
 	public static void main(String[] args) {
@@ -95,7 +99,6 @@ public class MainWindow extends Application {
 		grid.add(actionTarget, 1, 6);
 
 		button.setOnAction(new EventHandler<ActionEvent>() {
-			// FIXME
 
 			@Override
 			public void handle(ActionEvent event) {
@@ -114,6 +117,7 @@ public class MainWindow extends Application {
 					actionTarget.setFill(Color.DARKSEAGREEN);
 					actionTarget.setText("Login was successful.");
 					primaryStage.setScene(mainScene);
+					addToLog("Application started.");
 				} else {
 					Calendar cal = Calendar.getInstance();
 					SimpleDateFormat sdf = new SimpleDateFormat("SSS");
@@ -156,7 +160,7 @@ public class MainWindow extends Application {
 		downloadEmailsButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				emailService.ReadEmails();
+				onDownloadEmailsButtonClick();
 			}
 		});
 		leftPane.add(downloadEmailsButton, 0, 0);
@@ -170,6 +174,7 @@ public class MainWindow extends Application {
 		logArea.setEditable(false);
 		logArea.setText("---LOG---");
 		logArea.setWrapText(true);
+		
 		leftPane.add(logArea, 0, 2);
 
 		// Center
@@ -184,7 +189,7 @@ public class MainWindow extends Application {
 		rulesHeader.setStyle("-fx-font: 20px Tahoma;");
 		centerPane.add(rulesHeader, 0, 0);
 		
-		Button newRuleButton = new Button("Add Rule");
+		newRuleButton = new Button("Add Rule");
 		newRuleButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
@@ -212,7 +217,8 @@ public class MainWindow extends Application {
 		String currentTime = sdf.format(calendar.getTime());
 		
 		message = "[" + currentTime + "] " + message;
-		logArea.setText(logArea.getText() + "\n" + message);
+		logArea.appendText("\n");
+		logArea.appendText(message);
 	}
 	
 	public static void setHeaderInfo(String message, String hexColor){
@@ -226,6 +232,29 @@ public class MainWindow extends Application {
 	
 	private void onDeleteRuleButtonClick(HBox ruleBox){
 		centerPane.getChildren().remove(ruleBox);		
+	}
+	
+	private void onDownloadEmailsButtonClick(){
+		final Task task = new Task<Void>(){
+
+			@Override
+			protected Void call() throws Exception {
+				try {
+					newRuleButton.setDisable(true);
+					emailService.ReadEmails();
+				} catch (IllegalStateException e) {
+					//e.printStackTrace();
+				}
+				newRuleButton.setDisable(false);
+				return null;
+			}
+			
+		};
+		
+		
+		
+		new Thread(task).start();
+		
 	}
 	
 	private void onAddRuleButtonClick(){
