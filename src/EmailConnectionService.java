@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -95,6 +96,24 @@ public class EmailConnectionService {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	
+	public void ReadAllEmails(){
+		for (Message message : emailList){
+			try {
+				String body = message.getContent().toString();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (MessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void LoadRules(){
+		
 	}
 	
 	

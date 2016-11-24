@@ -51,7 +51,7 @@ public class MainWindow extends Application {
 
 	private static TextArea logArea;
 
-	public static final boolean DEBUG_MODE = true;
+	public static final boolean DEBUG_MODE = false;
 	public static final boolean SHOW_GRIDS = false;
 
 	private static Label headerInfoLabel;
@@ -206,6 +206,12 @@ public class MainWindow extends Application {
 
 		applyRules = new Button("Apply Rules");
 		applyRules.setDisable(true);
+		applyRules.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				onApplyRulesButtonClick();
+			}
+		});
 		leftPane.add(applyRules, 0, 1);
 
 		exportCSVButton = new Button("Export to CSV");
@@ -253,6 +259,21 @@ public class MainWindow extends Application {
 		// centerPane.setGridLinesVisible(true);
 		return new Scene(pane, 800, 400);
 
+	}
+
+	private void onApplyRulesButtonClick() {
+		final Task<Void> task = new Task<Void>() {
+			
+			@Override
+			protected Void call() throws Exception {
+				MainWindow.setHeaderInfo("Applying rules...", GESSColor.DOWNLOADING_ORANGE);
+				emailService.ReadAllEmails();
+				return null;
+			}
+		};
+		
+		new Thread(task).start();
+		
 	}
 
 	public static void addToLog(String message) {
