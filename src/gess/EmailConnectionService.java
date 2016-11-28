@@ -127,7 +127,10 @@ public class EmailConnectionService {
 				Entry entry = new Entry();
 				for (Rule rule : rules){
 					try {
-						entry.entryCSV += rule.apply(body);
+						if (entry.entryCSV == "")
+							entry.entryCSV += rule.apply(body);
+						else
+							entry.entryCSV += "," + rule.apply(body);
 					} catch (NoMatchException e) {
 						entry.entryCSV += "<empty>";
 					}

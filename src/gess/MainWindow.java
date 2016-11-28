@@ -328,6 +328,7 @@ public class MainWindow extends Application {
 	}
 
 	private void onDeleteRuleButtonClick(HBox ruleBox) {
+		
 		centerPane.getChildren().remove(ruleBox);
 	}
 
