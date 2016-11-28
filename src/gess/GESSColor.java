@@ -1,3 +1,4 @@
+package gess;
 
 public class GESSColor {
 	public static final String SUCCESS_GREEN = "#DFF2BF";

@@ -1,10 +1,12 @@
+package gess;
+import exceptions.NoMatchException;
 
-public interface Rule {
+public abstract interface Rule {
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public String apply();
+	public abstract String apply() throws NoMatchException;
 	
 }
