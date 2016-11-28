@@ -1,7 +1,9 @@
 package gess;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -39,9 +41,7 @@ public class MainWindow extends Application {
 	GridPane centerPane;
 
 	private Button newRuleButton;
-
 	private Button exportCSVButton;
-
 	private Button applyRules;
 
 	private Text actionTarget;
@@ -57,6 +57,8 @@ public class MainWindow extends Application {
 
 	private static Label headerInfoLabel;
 	private static HBox header;
+	
+	private List<TextField> regexFields = new ArrayList<TextField>();
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -65,7 +67,7 @@ public class MainWindow extends Application {
 
 		mainScene = setMainScene();
 		loginScene = setLoginScene();
-
+		
 		primaryStage.setScene(loginScene);
 		primaryStage.show();
 
@@ -135,7 +137,7 @@ public class MainWindow extends Application {
 
 				try {
 					loginButton.setDisable(true);
-					
+
 					actionTarget.setFill(Color.DODGERBLUE);
 					actionTarget.setText("Connecting...");
 					if (DEBUG_MODE) {
@@ -162,14 +164,13 @@ public class MainWindow extends Application {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				
-				if (result == false){
+
+				if (result == false) {
 					loginButton.setDisable(false);
 				}
 				return null;
 			}
-			
-			
+
 		};
 
 		new Thread(task).start();
@@ -217,8 +218,14 @@ public class MainWindow extends Application {
 
 		exportCSVButton = new Button("Export to CSV");
 		exportCSVButton.setDisable(true);
+		exportCSVButton.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				onExportCSVButtonClick();
+			}
+		});
 		leftPane.add(exportCSVButton, 0, 2);
-		
+
 		leftPane.setStyle("-fx-background-color: #d7e4e5");
 
 		logArea = new TextArea();
@@ -264,15 +271,39 @@ public class MainWindow extends Application {
 
 	private void onApplyRulesButtonClick() {
 		final Task<Void> task = new Task<Void>() {
-			
+
 			@Override
 			protected Void call() throws Exception {
 				MainWindow.setHeaderInfo("Applying rules...", GESSColor.DOWNLOADING_ORANGE);
-				emailService.ReadAllEmails();
+				emailService.ResetRules();
+				for (TextField field : regexFields){
+					if (field != null){
+						emailService.AddRule(new FieldRule(field.getText()));
+					}
+				}
+				emailService.ApplyAllRules();
+				MainWindow.setHeaderInfo("Rules appplied. Ready to export to CSV.", GESSColor.SUCCESS_GREEN);
+				exportCSVButton.setDisable(false);
 				return null;
 			}
 		};
-		
+
+		new Thread(task).start();
+
+	}
+	
+	private void onExportCSVButtonClick(){
+		final Task<Void> task = new Task<Void>() {
+
+			@Override
+			protected Void call() throws Exception {
+				MainWindow.setHeaderInfo("Exporting to CSV...", GESSColor.DOWNLOADING_ORANGE);
+				emailService.ExportCSV();
+				MainWindow.setHeaderInfo("Exported to CSV successfully!", GESSColor.SUCCESS_GREEN);
+				return null;
+			}
+		};
+
 		new Thread(task).start();
 		
 	}
@@ -316,7 +347,7 @@ public class MainWindow extends Application {
 					// e.printStackTrace();
 				}
 				newRuleButton.setDisable(false);
-				downloadEmailsButton.setDisable(false);
+				downloadEmailsButton.setDisable(false);				
 				return null;
 			}
 
@@ -343,6 +374,8 @@ public class MainWindow extends Application {
 		Button deleteButton = new Button("Delete");
 		ruleBox.getChildren().add(deleteButton);
 		centerPane.addColumn(0, ruleBox);
+		
+		regexFields.add(regexField);
 
 		deleteButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override

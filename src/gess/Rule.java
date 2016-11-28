@@ -1,12 +1,14 @@
 package gess;
 import exceptions.NoMatchException;
 
-public abstract interface Rule {
+public interface Rule {
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public abstract String apply() throws NoMatchException;
+	public String apply(String body) throws NoMatchException;
 	
+	
+	public String getRuleName();
 }

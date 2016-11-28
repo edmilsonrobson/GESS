@@ -1,6 +1,7 @@
 package gess;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 
@@ -10,6 +11,8 @@ import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Store;
+
+import exceptions.NoMatchException;
 
 public class EmailConnectionService {
 
@@ -21,7 +24,9 @@ public class EmailConnectionService {
 	private Session session;
 	
 	private List<Message> emailList;
-
+	private List<Rule> rules;
+	private List<Entry> entries;
+	
 	public EmailConnectionService(String email, String password) {
 		this.email = email;
 		this.password = password;
@@ -31,6 +36,8 @@ public class EmailConnectionService {
 		
 		host = "imap.gmail.com";
 		
+		rules = new ArrayList<Rule>();
+		entries = new ArrayList<Entry>();
 		
 	}
 
@@ -52,7 +59,7 @@ public class EmailConnectionService {
 		MainWindow.setHeaderInfo("Downloading...", GESSColor.DOWNLOADING_ORANGE);
 		MainWindow.addToLog("Starting to read e-mails...");
 		
-		int numberOfEmailsFromLast = 30;
+		int numberOfEmailsFromLast = 10;
 		try {
 						
 			Session session = Session.getInstance(props);
@@ -113,8 +120,46 @@ public class EmailConnectionService {
 		}
 	}
 	
-	public void LoadRules(){
-		
+	public void ApplyAllRules(){
+		for (Message message : emailList){
+			try {
+				String body = message.getContent().toString();
+				Entry entry = new Entry();
+				for (Rule rule : rules){
+					try {
+						entry.entryCSV += rule.apply(body);
+					} catch (NoMatchException e) {
+						entry.entryCSV += "<empty>";
+					}
+				}
+				entries.add(entry);
+				MainWindow.addToLog("New rule applied!");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (MessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void AddRule(Rule rule){
+		if (rules.contains(rule) == false){
+			rules.add(rule);
+		}
+	}
+	
+	public void ExportCSV(){
+		MainWindow.addToLog("Exporting " + entries.size() + " entries...");
+		for (Entry entry : entries){
+			MainWindow.addToLog(entry.entryCSV);
+		}
+		MainWindow.addToLog("Finished exporting.");
+	}
+
+	public void ResetRules() {
+		rules = new ArrayList<Rule>();
 	}
 	
 	

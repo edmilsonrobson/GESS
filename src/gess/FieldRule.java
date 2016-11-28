@@ -6,16 +6,16 @@ import exceptions.NoMatchException;
 
 public class FieldRule implements Rule {
 
-	public String body;
 	public String ruleText;
+	public String ruleName;
 	
-	public FieldRule (String body, String ruleText){
-		this.body = body;
+	public FieldRule (String ruleText){
 		this.ruleText = ruleText;
+		this.ruleName = ruleText.replace(":", "");
 	}
 	
 	@Override
-	public String apply() throws NoMatchException {
+	public String apply(String body) throws NoMatchException {
 		Pattern pattern = Pattern.compile(ruleText + "(.*)$", Pattern.MULTILINE);
 		Matcher matcher = pattern.matcher(body);
 		if (matcher.find()){
@@ -30,5 +30,12 @@ public class FieldRule implements Rule {
 		return "";
 		
 	}
+
+	@Override
+	public String getRuleName() {
+		return this.ruleText;
+	}
+	
+	
 
 }
