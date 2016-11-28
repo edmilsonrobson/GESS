@@ -274,7 +274,6 @@ public class MainWindow extends Application {
 
 			@Override
 			protected Void call() throws Exception {
-				MainWindow.setHeaderInfo("Applying rules...", GESSColor.DOWNLOADING_ORANGE);
 				emailService.ResetRules();
 				for (TextField field : regexFields){
 					if (field != null){
@@ -282,7 +281,7 @@ public class MainWindow extends Application {
 					}
 				}
 				emailService.ApplyAllRules();
-				MainWindow.setHeaderInfo("Rules appplied. Ready to export to CSV.", GESSColor.SUCCESS_GREEN);
+				
 				exportCSVButton.setDisable(false);
 				return null;
 			}
@@ -340,8 +339,14 @@ public class MainWindow extends Application {
 				downloadEmailsButton.setDisable(true);
 				try {
 					newRuleButton.setDisable(true);
-					emailService.ReadEmails();
-					MainWindow.setHeaderInfo("Ready to apply rules.", GESSColor.SUCCESS_GREEN);
+					emailService.ReadEmails();					
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							MainWindow.setHeaderInfo("Ready to apply rules.", GESSColor.SUCCESS_GREEN);
+						}
+					});
+					
 					applyRules.setDisable(false);
 				} catch (Exception e) {
 					MainWindow.setHeaderInfo("Failed to download e-mails. Try again.", GESSColor.ERROR_RED);
