@@ -5,7 +5,4 @@ import java.util.Map;
 
 public class Entry {
 	public String entryCSV = "";
-	
-	
-	
 }

@@ -57,8 +57,16 @@ public class MainWindow extends Application {
 
 	private static Label headerInfoLabel;
 	private static HBox header;
-	
+
 	private List<TextField> regexFields = new ArrayList<TextField>();
+
+	private TextField subjectField;
+
+	private TextField emailTextField;
+
+	private PasswordField passwordTextField;
+
+	private TextField numberEmailsField;
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -67,7 +75,7 @@ public class MainWindow extends Application {
 
 		mainScene = setMainScene();
 		loginScene = setLoginScene();
-		
+
 		primaryStage.setScene(loginScene);
 		primaryStage.show();
 
@@ -92,14 +100,14 @@ public class MainWindow extends Application {
 
 		Label emailLabel = new Label("E-mail:");
 		grid.add(emailLabel, 0, 1);
-		TextField emailTextField = new TextField();
+		emailTextField = new TextField();
 		emailTextField.setTooltip(new Tooltip("Enter your Gmail e-mail e.g \"bob@gmail.com\""));
 
 		grid.add(emailTextField, 1, 1);
 
 		Label passwordLabel = new Label("Senha:");
 		grid.add(passwordLabel, 0, 2);
-		PasswordField passwordTextField = new PasswordField();
+		passwordTextField = new PasswordField();
 		passwordTextField.setTooltip(new Tooltip("Enter your Gmail password"));
 		grid.add(passwordTextField, 1, 2);
 
@@ -136,6 +144,9 @@ public class MainWindow extends Application {
 				boolean result = false;
 
 				try {
+					emailTextField.setDisable(true);
+					passwordTextField.setDisable(true);
+
 					loginButton.setDisable(true);
 
 					actionTarget.setFill(Color.DODGERBLUE);
@@ -143,7 +154,7 @@ public class MainWindow extends Application {
 					if (DEBUG_MODE) {
 						result = true;
 					} else {
-						result = emailService.Login();
+						result = emailService.login();
 					}
 					if (result) {
 						actionTarget.setFill(Color.FORESTGREEN);
@@ -159,7 +170,7 @@ public class MainWindow extends Application {
 						});
 					} else {
 						actionTarget.setFill(Color.FIREBRICK);
-						actionTarget.setText("Failed to login.");
+						actionTarget.setText("Failed to login. Bad email/password?");
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -167,6 +178,8 @@ public class MainWindow extends Application {
 
 				if (result == false) {
 					loginButton.setDisable(false);
+					emailTextField.setDisable(false);
+					passwordTextField.setDisable(false);
 				}
 				return null;
 			}
@@ -248,6 +261,31 @@ public class MainWindow extends Application {
 		rulesHeader.setStyle("-fx-font: 20px Tahoma;");
 		centerPane.add(rulesHeader, 0, 0);
 
+		Label subjectLabel = new Label("Subject Filter:");
+		subjectLabel.setStyle("-fx-font: 15px Tahoma;");
+		centerPane.add(subjectLabel, 0, 1);
+		
+		Label numberEmailsLabel = new Label("Number of e-mails to read:");
+		numberEmailsLabel.setStyle("-fx-font: 15px Tahoma;");
+		centerPane.add(numberEmailsLabel, 0, 2);
+
+		subjectField = new TextField();
+		subjectField.setTooltip(
+				new Tooltip("A subject filter for the e-mails. Only e-mails with the given subject will be processed. "
+						+ "Leave it blank for no filters."));
+		subjectField.setPromptText("(example: \"4 SIA\".)");
+		subjectField.setPrefSize(150, 30);
+		subjectField.setFocusTraversable(false);
+		centerPane.add(subjectField, 1, 1);
+		
+		numberEmailsField = new TextField();
+		numberEmailsField.setTooltip(
+				new Tooltip("Number of e-mails to read (from the last one til the beginning"));
+		numberEmailsField.setPromptText("(example: \"37\")");
+		numberEmailsField.setPrefSize(60, 30);
+		numberEmailsField.setFocusTraversable(false);
+		centerPane.add(numberEmailsField, 1, 2);
+
 		newRuleButton = new Button("Add Rule");
 		newRuleButton.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
@@ -256,7 +294,7 @@ public class MainWindow extends Application {
 			}
 		});
 
-		centerPane.add(newRuleButton, 0, 1);
+		centerPane.add(newRuleButton, 0, 3);
 
 		scrollPane.setContent(centerPane);
 		pane.setTop(header);
@@ -275,13 +313,13 @@ public class MainWindow extends Application {
 			@Override
 			protected Void call() throws Exception {
 				emailService.ResetRules();
-				for (TextField field : regexFields){
-					if (field != null){
+				for (TextField field : regexFields) {
+					if (field != null) {
 						emailService.AddRule(new FieldRule(field.getText()));
 					}
 				}
 				emailService.ApplyAllRules();
-				
+
 				exportCSVButton.setDisable(false);
 				return null;
 			}
@@ -290,8 +328,8 @@ public class MainWindow extends Application {
 		new Thread(task).start();
 
 	}
-	
-	private void onExportCSVButtonClick(){
+
+	private void onExportCSVButtonClick() {
 		final Task<Void> task = new Task<Void>() {
 
 			@Override
@@ -304,7 +342,7 @@ public class MainWindow extends Application {
 		};
 
 		new Thread(task).start();
-		
+
 	}
 
 	public static void addToLog(String message) {
@@ -327,11 +365,14 @@ public class MainWindow extends Application {
 	}
 
 	private void onDeleteRuleButtonClick(HBox ruleBox) {
-		
+
 		centerPane.getChildren().remove(ruleBox);
 	}
 
 	private void onDownloadEmailsButtonClick() {
+		if (subjectField.getText().equals("") == false) {
+			emailService.setSubjectFilter(subjectField.getText());
+		}
 		final Task<Void> task = new Task<Void>() {
 
 			@Override
@@ -339,21 +380,31 @@ public class MainWindow extends Application {
 				downloadEmailsButton.setDisable(true);
 				try {
 					newRuleButton.setDisable(true);
-					emailService.ReadEmails();					
+					int numberEmailsToRead;
+					try {
+						numberEmailsToRead = Integer.parseInt(numberEmailsField.getText());
+					} catch (Exception e) {
+						numberEmailsToRead = 1;
+						e.printStackTrace();
+					}
+					if (numberEmailsToRead <= 0){
+						numberEmailsToRead = 1;
+					}
+					emailService.downloadEmails(numberEmailsToRead);
 					Platform.runLater(new Runnable() {
 						@Override
 						public void run() {
 							MainWindow.setHeaderInfo("Ready to apply rules.", GESSColor.SUCCESS_GREEN);
 						}
 					});
-					
+
 					applyRules.setDisable(false);
 				} catch (Exception e) {
 					MainWindow.setHeaderInfo("Failed to download e-mails. Try again.", GESSColor.ERROR_RED);
-					// e.printStackTrace();
+					e.printStackTrace();
 				}
 				newRuleButton.setDisable(false);
-				downloadEmailsButton.setDisable(false);				
+				downloadEmailsButton.setDisable(false);
 				return null;
 			}
 
@@ -380,7 +431,7 @@ public class MainWindow extends Application {
 		Button deleteButton = new Button("Delete");
 		ruleBox.getChildren().add(deleteButton);
 		centerPane.addColumn(0, ruleBox);
-		
+
 		regexFields.add(regexField);
 
 		deleteButton.setOnAction(new EventHandler<ActionEvent>() {

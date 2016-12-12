@@ -15,9 +15,9 @@ public class FieldRuleTest {
 	@Test
 	public void testFieldRuleExamples() {
 		String body = "Name: John\n\nOccupation: Scientist\n\nCháracter: Tést";
-		Rule rule1 = new FieldRule("Name:");
-		Rule rule2 = new FieldRule("Occupation:");
-		Rule rule3 = new FieldRule("Cháracter:");
+		Rule rule1 = new FieldRule("Name");
+		Rule rule2 = new FieldRule("Occupation");
+		Rule rule3 = new FieldRule("Cháracter");
 		String extractedText = "";
 		try {			
 			Assert.assertEquals("John", rule1.apply(body));

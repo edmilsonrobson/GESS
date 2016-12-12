@@ -16,7 +16,7 @@ public class FieldRule implements Rule {
 	
 	@Override
 	public String apply(String body) throws NoMatchException {
-		Pattern pattern = Pattern.compile(ruleText + "(.*)$", Pattern.MULTILINE);
+		Pattern pattern = Pattern.compile(ruleText + ":(.*)$", Pattern.MULTILINE);
 		Matcher matcher = pattern.matcher(body);
 		if (matcher.find()){
 			String extractedText = matcher.group(1).trim();
