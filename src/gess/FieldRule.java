@@ -10,13 +10,13 @@ public class FieldRule implements Rule {
 	public String ruleName;
 	
 	public FieldRule (String ruleText){
-		this.ruleText = ruleText;
-		this.ruleName = ruleText.replace(":", "");
+		this.ruleText = ruleText;		
 	}
 	
 	@Override
 	public String apply(String body) throws NoMatchException {
-		Pattern pattern = Pattern.compile(ruleText + ":(.*)$", Pattern.MULTILINE);
+		System.out.println(body);
+		Pattern pattern = Pattern.compile(ruleText + "(.*)$", Pattern.MULTILINE);
 		Matcher matcher = pattern.matcher(body);
 		if (matcher.find()){
 			String extractedText = matcher.group(1).trim();

@@ -7,15 +7,19 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
 
+import javax.activation.DataHandler;
+import javax.mail.BodyPart;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Store;
 
 import exceptions.NoMatchException;
 import javafx.application.Platform;
+import sun.rmi.runtime.Log;
 
 public class EmailConnectionService {
 
@@ -186,14 +190,40 @@ public class EmailConnectionService {
 		for (Message message : emailList) {
 			appliedRules++;
 			try {
-				String body = message.getContent().toString();
+				Object msgContent = message.getContent();
+				
+				 String content = "";             
+
+			     /* Check if content is pure text/html or in parts */                     
+			     if (msgContent instanceof Multipart) {
+
+			         Multipart multipart = (Multipart) msgContent;			        
+
+			         for (int j = 0; j < multipart.getCount(); j++) {
+
+			          BodyPart bodyPart = multipart.getBodyPart(j);			         
+
+			          String disposition = bodyPart.getDisposition();
+
+			          content = bodyPart.getContent().toString();
+			          System.out.println(content);
+			          content = content.replaceAll("</span>", "\n");
+			          content = content.replaceAll("<div>", "\n");
+			          content = content.replaceAll("</div>", "\n");
+			          content = content.replaceAll("\\<[^>]*>","");
+			          content += "\n";
+			        }
+			     }
+			     else                
+			         content= message.getContent().toString();
+			     			
 				Entry entry = new Entry();
 				for (Rule rule : rules) {
 					try {
-						if (entry.entryCSV == "")
-							entry.entryCSV += rule.apply(body);
-						else if (rule.getRuleName() != "")
-							entry.entryCSV += "," + rule.apply(body);
+						if (entry.entryCSV.equals(""))
+							entry.entryCSV += rule.apply(content);
+						else
+							entry.entryCSV += "," + rule.apply(content);
 					} catch (NoMatchException e) {
 						entry.entryCSV += ",<empty>";
 					}
